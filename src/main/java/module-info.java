@@ -1,8 +1,9 @@
-module org.weatherapp {
+module org.weatherapp  {
     requires javafx.controls;
     requires javafx.fxml;
 
 
-    opens org.weatherapp to javafx.fxml;
-    exports org.weatherapp;
+    opens org.weatherapp.UI to javafx.fxml, javafx.controls;
+    exports org.weatherapp.UI;
+
 }
