@@ -23,7 +23,7 @@ public class OpenWeatherMapData {
         output = output.substring(1, output.length() - 1);
         // filter the JSON Data for lat and lon (coordination's)
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(output.toString());
+        JsonNode jsonNode = objectMapper.readTree(output);
         String lat = jsonNode.get("lat").asText();
         String lon = jsonNode.get("lon").asText();
         //get Weather Information's
