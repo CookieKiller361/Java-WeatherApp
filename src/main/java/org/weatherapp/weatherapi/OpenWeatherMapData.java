@@ -1,14 +1,15 @@
 package org.weatherapp.weatherapi;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class OpenWeatherMapData {
 
@@ -17,6 +18,7 @@ public class OpenWeatherMapData {
         //get location Information's
         URL url = new URL(urlString + "q=" + city + "," + countryCode + "&limit=" + limit + "&appid=" + apiKey);
         HttpURLConnection connection = connect(url);
+        //todo can also be optimized
         StringBuilder output = new StringBuilder();
         if (connection.getResponseCode() != 200) {
             throw new RuntimeException("HttpResponseCode: " + connection.getResponseCode());
@@ -37,6 +39,7 @@ public class OpenWeatherMapData {
         //get Weather Information's
         url = new URL("https://api.openweathermap.org/data/2.5/weather?" + "lat=" + lat + "&lon=" + lon + "&appid=" + apiKey + "&units=metric");
         connection = connect(url);
+        //todo can also be optimized
         if (connection.getResponseCode() != 200) {
             throw new RuntimeException("HttpResponseCode: " + connection.getResponseCode());
         } else {
@@ -69,12 +72,30 @@ public class OpenWeatherMapData {
         return con;
     }
 
+    public String getCLIWeather(String apiOutputData) throws JsonProcessingException {
+        StringBuilder output = new StringBuilder();
+        ObjectMapper objectMapper = new ObjectMapper();
+        //this step is very important because the parser can only use one json-Object
+        apiOutputData = apiOutputData.replace("}{", ",");
+        JsonNode jsonNode = objectMapper.readTree(apiOutputData);
+        String name = jsonNode.get("name").asText();
+        String temp = jsonNode.get("main").get("temp").asText();
+        String feels_like = jsonNode.get("main").get("feels_like").asText();
+        String weatherStatus = jsonNode.get("weather").get(0).get("description").asText();
+        output.append("City-Name: " + name + "\n");
+        output.append("Temp: " + temp + "\n");
+        output.append("Feels like : " + feels_like + "\n");
+        output.append("Weather status: " + weatherStatus + "\n");
+        return output.toString();
+    }
+
     //this main is only for testing
     public static void main(String[] args) throws IOException {
         OpenWeatherMapData Test = new OpenWeatherMapData();
-        //just for testing
         String result = Test.getWeatherData("http://api.openweathermap.org/geo/1.0/direct?", "Roetgen", "DE", "1", Test.getApiKey("src/main/resources/other/apiKeyStorage.txt"));
-        System.out.println(result);
+        String cliWeatherInformation = Test.getCLIWeather(result);
+        System.out.println(cliWeatherInformation);
+
     }
 
 }
