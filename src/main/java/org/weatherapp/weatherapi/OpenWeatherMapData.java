@@ -1,6 +1,7 @@
 package org.weatherapp.weatherapi;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -49,7 +50,7 @@ public class OpenWeatherMapData {
         return output.toString();
     }
 
-    private String getApiKey(String path) {
+    private String getApiKey(String path) throws FileNotFoundException {
         File file = new File(path);
         Scanner scanner = new Scanner(file);
         StringBuilder output = new StringBuilder();
