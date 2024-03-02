@@ -18,19 +18,9 @@ public class OpenWeatherMapData {
         //get location Information's
         URL url = new URL(urlString + "q=" + city + "," + countryCode + "&limit=" + limit + "&appid=" + apiKey);
         HttpURLConnection connection = connect(url);
-        //todo can also be optimized
-        StringBuilder output = new StringBuilder();
-        if (connection.getResponseCode() != 200) {
-            throw new RuntimeException("HttpResponseCode: " + connection.getResponseCode());
-        } else {
-            Scanner scanner = new Scanner(url.openStream());
-            while (scanner.hasNextLine()) {
-                output.append(scanner.nextLine());
-            }
-        }
-        //deletes the Array Syntax, cause readTree can't handle that
-        output.deleteCharAt(0);
-        output.deleteCharAt(output.length() - 1);
+        String output = apiDataToString(connection, url);
+        //deletes the Array Syntax of the result, cause readTree can't handle that
+        output = output.substring(1, output.length() - 1);
         // filter the JSON Data for lat and lon (coordination's)
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(output.toString());
@@ -39,16 +29,8 @@ public class OpenWeatherMapData {
         //get Weather Information's
         url = new URL("https://api.openweathermap.org/data/2.5/weather?" + "lat=" + lat + "&lon=" + lon + "&appid=" + apiKey + "&units=metric");
         connection = connect(url);
-        //todo can also be optimized
-        if (connection.getResponseCode() != 200) {
-            throw new RuntimeException("HttpResponseCode: " + connection.getResponseCode());
-        } else {
-            Scanner scanner = new Scanner(url.openStream());
-            while (scanner.hasNextLine()) {
-                output.append(scanner.nextLine());
-            }
-        }
-        return output.toString();
+        output = apiDataToString(connection, url);
+        return output;
     }
 
     /**
@@ -86,6 +68,19 @@ public class OpenWeatherMapData {
         output.append("Temp: " + temp + "\n");
         output.append("Feels like : " + feels_like + "\n");
         output.append("Weather status: " + weatherStatus + "\n");
+        return output.toString();
+    }
+
+    private String apiDataToString(HttpURLConnection connection, URL url) throws IOException {
+        StringBuilder output = new StringBuilder();
+        if (connection.getResponseCode() != 200) {
+            throw new RuntimeException("HttpResponseCode: " + connection.getResponseCode());
+        } else {
+            Scanner scanner = new Scanner(url.openStream());
+            while (scanner.hasNextLine()) {
+                output.append(scanner.nextLine());
+            }
+        }
         return output.toString();
     }
 
